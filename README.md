@@ -18,13 +18,16 @@ python3 -m http.server 8000
 
 ## Features
 
-- **Fruit & loot** — seven hand-drawn fruit models (apple, orange, blueberry,
-  cherry, banana, grapes, strawberry), several on the board at once, spawned
-  by rarity. Rarer fruit grants more XP.
+- **Fruit & loot** — twelve hand-drawn fruit models (apple, orange, blueberry,
+  lemon, cherry, banana, pear, peach, grapes, strawberry, kiwi, watermelon),
+  four on the board at once, spawned by rarity. Rarer fruit grants more XP.
 - **XP → levels → coins** — eating fruit fills the XP bar; leveling up awards
   coins to a **persistent wallet** and speeds the snake up a notch.
-- **Clean, minimal look** — flat dark board, soft gradient serpent with an
-  expressive head, subtle grid, particle bursts, and a light screen shake on
+- **Shop, gear & buffs** — spend coins on a **Totem of Undying** (auto-revive),
+  permanent gear (**Scholar's Charm**, **Lucky Coin**, **Guardian Scale**), and
+  **snake skins**. Everything you own persists between sessions.
+- **Clean, minimal look** — flat dark board, a solid single-color serpent with
+  an expressive head, faint grid, particle bursts, and a light screen shake on
   death.
 - **Smooth motion** — logic runs on a fixed grid tick while rendering
   interpolates between cells, so the snake glides instead of stepping.
@@ -41,13 +44,30 @@ python3 -m http.server 8000
 
 | Fruit | XP | Rarity |
 | ----- | -- | ------ |
-| Apple, Orange, Blueberry | 1 | common |
-| Cherry, Banana | 2 | uncommon |
-| Grapes, Strawberry | 3 | rare |
+| Apple, Orange, Blueberry, Lemon | 1 | common |
+| Cherry, Banana, Pear, Peach | 2 | uncommon |
+| Grapes, Strawberry, Kiwi | 3 | rare |
+| Watermelon | 4 | jackpot |
 
 Filling the XP bar levels you up; each level up pays out `5 + level × 2` coins
-into a wallet that persists across runs (`localStorage`) — ready to feed a
-future RPG shop.
+(×1.5 with the Lucky Coin) into a wallet that persists across runs
+(`localStorage`).
+
+## Shop
+
+Open the **Shop** from the menu or the game-over screen to spend coins:
+
+| Item | Type | Effect |
+| ---- | ---- | ------ |
+| 🧿 Totem of Undying | buff (stacks) | Auto-revives you once on death |
+| 🔮 Scholar's Charm | gear | +1 XP from every fruit |
+| 🍀 Lucky Coin | gear | +50% coins from every level up |
+| 🛡️ Guardian Scale | gear | Survive one fatal hit free, once per run |
+| Skins | cosmetic | Emerald (free), Ember, Frost, Amethyst, Gold |
+
+On death the game auto-spends a free Guardian revive first, then a Totem if you
+have one: the snake is rebuilt at the center with a brief invulnerability
+window instead of ending the run.
 
 ## Controls
 

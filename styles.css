@@ -202,6 +202,80 @@ body {
 }
 .wallet { display: flex; align-items: center; gap: 8px; color: var(--gold); font-weight: 700; }
 .wallet .coin-ic { width: 18px; height: 18px; }
+.revived { color: var(--green); font-weight: 700; font-size: 0.9rem; }
+
+.totems {
+  display: flex; align-items: center;
+  font-weight: 700; font-size: 0.95rem;
+  padding: 6px 10px; border-radius: 11px;
+  background: var(--panel); border: 1px solid var(--panel-border);
+  color: var(--text); white-space: nowrap;
+}
+
+/* ---- Buttons ---- */
+.btn-row { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; }
+.btn.ghost {
+  color: var(--text);
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid var(--panel-border);
+}
+.btn.ghost:hover { background: rgba(255, 255, 255, 0.1); }
+
+/* ---- Shop ---- */
+.shop {
+  position: absolute; inset: 0;
+  display: flex; flex-direction: column;
+  padding: 14px 14px 8px;
+}
+.shop-head {
+  display: grid; grid-template-columns: 40px 1fr auto; align-items: center;
+  gap: 8px; padding-bottom: 12px;
+}
+.shop-head .back {
+  width: 38px; height: 38px; border-radius: 11px;
+  border: 1px solid var(--panel-border); background: rgba(255, 255, 255, 0.05);
+  color: var(--text); font-size: 1.5rem; line-height: 1; cursor: pointer;
+}
+.shop-head .back:active { transform: scale(0.92); }
+.shop-title { margin: 0; text-align: center; font-size: 1.4rem; font-weight: 800; }
+
+.shop-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding-right: 2px; }
+.shop-section { margin-bottom: 14px; }
+.shop-section-title {
+  font-size: 0.66rem; letter-spacing: 0.18em; text-transform: uppercase;
+  color: var(--text-dim); font-weight: 700; margin: 4px 2px 8px;
+}
+
+.shop-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 12px; margin-bottom: 8px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--panel-border);
+  text-align: left;
+}
+.si-icon { flex: none; width: 38px; display: grid; place-items: center; }
+.si-emoji { font-size: 1.7rem; line-height: 1; }
+.si-skin { width: 24px; height: 24px; border-radius: 50%; }
+.si-info { flex: 1; min-width: 0; }
+.si-name { font-weight: 700; font-size: 0.98rem; }
+.si-desc { color: var(--text-dim); font-size: 0.78rem; line-height: 1.3; margin-top: 2px; }
+.si-buy { flex: none; display: flex; align-items: center; gap: 8px; }
+.si-have { color: var(--text-dim); font-weight: 700; font-size: 0.85rem; }
+.si-btn {
+  display: flex; align-items: center; gap: 5px;
+  font-family: var(--font); font-weight: 700; font-size: 0.9rem;
+  color: #06120c; cursor: pointer;
+  padding: 8px 13px; border: none; border-radius: 10px;
+  background: linear-gradient(120deg, var(--gold), #ffb347);
+}
+.si-btn .coin-ic { width: 14px; height: 14px; box-shadow: inset 0 0 0 2px rgba(6,18,12,0.25); }
+.si-btn.equip { background: linear-gradient(120deg, var(--green), var(--green-2)); }
+.si-btn:active { transform: scale(0.94); }
+.si-btn.disabled { opacity: 0.4; filter: grayscale(0.4); }
+.si-tag { font-weight: 700; font-size: 0.82rem; padding: 6px 12px; border-radius: 10px; }
+.si-tag.owned { color: var(--text-dim); background: rgba(255, 255, 255, 0.06); }
+.si-tag.equipped { color: var(--green); background: rgba(64, 217, 138, 0.12); }
 
 /* ---- Hint footer ---- */
 .hint { color: var(--text-dim); font-size: 0.82rem; min-height: 1.2em; }
