@@ -56,31 +56,91 @@
   ];
   const FRUIT_WEIGHT = FRUITS.reduce((s, f) => s + f.weight, 0);
 
-  // ------------------------------------------------------------------ shop
+  // ------------------------------------------------------------ shop / gear
   // Consumables you can stock up on (auto-used).
   const CONSUMABLES = [
     { id: 'totem', name: 'Totem of Undying', icon: '🧿', price: 50,
       desc: 'Auto-revives you once when you die. Stacks — buy as many as you like.' },
   ];
-  // Permanent gear (bought once, always active).
-  const GEAR = [
-    { id: 'scholar',  name: "Scholar's Charm", icon: '🔮', price: 120,
-      desc: '+1 XP from every fruit you eat.' },
-    { id: 'lucky',    name: 'Lucky Coin',      icon: '🍀', price: 150,
-      desc: '+50% coins from every level up.' },
-    { id: 'guardian', name: 'Guardian Scale',  icon: '🛡️', price: 280,
-      desc: 'Survive one fatal hit for free, once per run.' },
+
+  // Equipment slots. Owned gear is equipped into a slot; only equipped gear is active.
+  const SLOTS = [
+    { id: 'charm', name: 'Charm', icon: '🔮' },
+    { id: 'armor', name: 'Armor', icon: '🛡️' },
+    { id: 'relic', name: 'Relic', icon: '💠' },
+    { id: 'skin',  name: 'Skin',  icon: '🎨' },
   ];
+
+  // Gear (bought once, then equipped into its slot). `effects` are applied while equipped.
+  const GEAR = [
+    { id: 'scholar',  slot: 'charm', name: "Scholar's Charm", icon: '🔮', price: 120,
+      desc: '+1 XP from every fruit.', effects: { xpPerFruit: 1 } },
+    { id: 'lucky',    slot: 'charm', name: 'Lucky Coin', icon: '🍀', price: 150,
+      desc: '+50% coins from level ups.', effects: { coinMult: 1.5 } },
+    { id: 'sage',     slot: 'charm', name: 'Sage Sigil', icon: '📜', price: 260,
+      desc: '+2 XP from every fruit.', effects: { xpPerFruit: 2 } },
+    { id: 'guardian', slot: 'armor', name: 'Guardian Scale', icon: '🛡️', price: 280,
+      desc: 'Survive one fatal hit per run.', effects: { freeRevives: 1 } },
+    { id: 'aegis',    slot: 'armor', name: 'Aegis Plate', icon: '🪖', price: 520,
+      desc: 'Survive two fatal hits per run.', effects: { freeRevives: 2 } },
+    { id: 'hunter',   slot: 'relic', name: "Hunter's Eye", icon: '👁️', price: 200,
+      desc: '+1 coin for every fruit eaten.', effects: { coinPerFruit: 1 } },
+    { id: 'swift',    slot: 'relic', name: 'Swift Sigil', icon: '🌀', price: 180,
+      desc: 'Start each run 15% slower — easier to steer.', effects: { speedMult: 1.15 } },
+  ];
+  const GEAR_BY_ID = Object.fromEntries(GEAR.map((g) => [g.id, g]));
+
   // Snake skins (bought once, then equippable). Emerald is free/owned by default.
   const SKINS = [
-    { id: 'emerald',  name: 'Emerald',  price: 0,   body: '#37cf82', head: '#57e29a', glow: 'rgba(55, 207, 130, 0.28)' },
-    { id: 'ember',    name: 'Ember',    price: 90,  body: '#ff7a3c', head: '#ffb057', glow: 'rgba(255, 122, 60, 0.30)' },
-    { id: 'frost',    name: 'Frost',    price: 90,  body: '#3cc7ff', head: '#8fe4ff', glow: 'rgba(60, 199, 255, 0.30)' },
-    { id: 'amethyst', name: 'Amethyst', price: 130, body: '#a86bff', head: '#c9a3ff', glow: 'rgba(168, 107, 255, 0.30)' },
-    { id: 'gold',     name: 'Gold',     price: 220, body: '#f6c945', head: '#ffe08a', glow: 'rgba(246, 201, 69, 0.35)' },
+    { id: 'emerald',  slot: 'skin', name: 'Emerald',  price: 0,   body: '#37cf82', head: '#57e29a', glow: 'rgba(55, 207, 130, 0.28)' },
+    { id: 'ember',    slot: 'skin', name: 'Ember',    price: 90,  body: '#ff7a3c', head: '#ffb057', glow: 'rgba(255, 122, 60, 0.30)' },
+    { id: 'frost',    slot: 'skin', name: 'Frost',    price: 90,  body: '#3cc7ff', head: '#8fe4ff', glow: 'rgba(60, 199, 255, 0.30)' },
+    { id: 'amethyst', slot: 'skin', name: 'Amethyst', price: 130, body: '#a86bff', head: '#c9a3ff', glow: 'rgba(168, 107, 255, 0.30)' },
+    { id: 'gold',     slot: 'skin', name: 'Gold',     price: 220, body: '#f6c945', head: '#ffe08a', glow: 'rgba(246, 201, 69, 0.35)' },
   ];
   const SKIN_BY_ID = Object.fromEntries(SKINS.map((s) => [s.id, s]));
+  const EQUIP_BY_ID = Object.fromEntries([...GEAR, ...SKINS].map((i) => [i.id, i]));
   const SHOP_BY_ID = Object.fromEntries([...CONSUMABLES, ...GEAR, ...SKINS].map((i) => [i.id, i]));
+
+  // --------------------------------------------------------------- campaign
+  // Story chapters. Each: a journey (eat fruitGoal fruit) then a boss fight.
+  const CHAPTERS = [
+    {
+      title: 'The Waking Grove',
+      tint: 'rgba(40, 96, 62, 0.18)',
+      intro: 'You stir beneath the roots — ancient, and starving. The Grove has grown wild in your long sleep. Feed. Grow strong. Then find the thing that woke you.',
+      fruitGoal: 6,
+      boss: { name: 'Gloomvine', title: 'the Choking Root', hp: 8, color: '#4caf6a' },
+      outro: 'Gloomvine withers to husk. Light pours through the shattered canopy — and on the wind, the sweet reek of rot.',
+    },
+    {
+      title: 'The Sunken Orchard',
+      tint: 'rgba(122, 82, 30, 0.18)',
+      intro: 'The orchard drowned an age ago. Its fruit is sweetest here, its guardians most sour. Something vast turns over in the mud below.',
+      fruitGoal: 8,
+      boss: { name: 'Rotharion', title: 'the Spoiled', hp: 12, color: '#c76b32' },
+      outro: 'Rotharion bursts in a spray of pulp and flies. Beyond the orchard wall waits the Nest — and the Elder that coils within it.',
+    },
+    {
+      title: 'The Obsidian Nest',
+      tint: 'rgba(78, 40, 112, 0.20)',
+      intro: "At the black heart of the world coils Vorathrax, the wyrm who devoured your kin. This is why you woke, little serpent. End it.",
+      fruitGoal: 10,
+      boss: { name: 'Vorathrax', title: 'the Elder Wyrm', hp: 16, color: '#8b4bd6' },
+      outro: 'Vorathrax falls still, at last. The Nest is silent. You are the last of the old serpents — and the first of a new age.',
+    },
+  ];
+  const FINAL_TEXT = 'The world is quiet, and it is yours. Coil beneath the roots, and dream of what comes next…';
+
+  // Boss-fight tuning.
+  const BOSS_CFG = {
+    orbTarget: 2,        // energy orbs kept on the board
+    hazardBaseMs: 2200,  // time between hazards at full boss HP
+    hazardWarnMs: 750,   // telegraph time before a hazard turns lethal
+    hazardActiveMs: 2600,// how long a lethal hazard lingers
+    orbCoins: 3,         // coins per orb hit
+    clearCoins: 40,      // base coin reward per boss (scales by chapter)
+  };
 
   // ------------------------------------------------------------------- utils
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -284,6 +344,7 @@
     start() { this.resume(); this._tone(320, 0.12, 'sine', 0.04, 620); }
     death() { this.resume(); this._tone(300, 0.5, 'sawtooth', 0.05, 70); }
     buy() { this.resume(); this._tone(700, 0.07, 'square', 0.035, 900, 0); this._tone(1050, 0.1, 'square', 0.035, null, 0.07); }
+    hit() { this.resume(); this._tone(220, 0.09, 'square', 0.05, 120); }
     revive() {
       this.resume();
       this._tone(660, 0.1, 'sine', 0.05, 990, 0);
@@ -353,16 +414,25 @@
       this.time = 0;
       this.shake = 0;
 
-      // persistent wallet, inventory + best level
+      // persistent wallet, inventory, equipment + progress
       this.coins = this._loadNum('serpent.coins');
       this.bestLevel = this._loadNum('serpent.bestLevel') || 1;
+      this.chaptersCleared = this._loadNum('serpent.chapters');
       this.totems = this._loadNum('serpent.totems');
       this.owned = this._loadOwned();               // Set of owned gear/skin ids
-      this.equippedSkin = this._loadStr('serpent.skin', 'emerald');
-      if (!this.owned.has(this.equippedSkin)) this.equippedSkin = 'emerald';
-      this.skin = SKIN_BY_ID[this.equippedSkin] || SKIN_BY_ID.emerald;
+      this.equipped = this._loadEquipped();         // { charm, armor, relic, skin }
+      this.skin = SKIN_BY_ID[this.equipped.skin] || SKIN_BY_ID.emerald;
       this.shopOpen = false;
+      this.equipOpen = false;
       this.invulnUntil = 0;
+
+      // campaign state (initialised per run in reset)
+      this.chapterIndex = 0;
+      this.phase = 'journey';
+      this.orbs = [];
+      this.hazards = [];
+      this.boss = null;
+      this.story = null;
 
       this._bindEvents();
       this.resize();
@@ -387,6 +457,29 @@
       return set;
     }
     _saveOwned() { this._save('serpent.owned', JSON.stringify([...this.owned])); }
+    _loadEquipped() {
+      const eq = { charm: null, armor: null, relic: null, skin: 'emerald' };
+      try {
+        const raw = JSON.parse(localStorage.getItem('serpent.equipped') || 'null');
+        if (raw && typeof raw === 'object') Object.assign(eq, raw);
+      } catch { /* ignore */ }
+      // migrate the older standalone skin key if present
+      if (eq.skin === 'emerald') eq.skin = this._loadStr('serpent.skin', 'emerald');
+      // validate against what's actually owned
+      const own = this.owned || new Set(['emerald']);
+      for (const s of ['charm', 'armor', 'relic']) {
+        const g = GEAR_BY_ID[eq[s]];
+        if (!g || g.slot !== s || !own.has(eq[s])) eq[s] = null;
+      }
+      if (!SKIN_BY_ID[eq.skin] || !own.has(eq.skin)) eq.skin = 'emerald';
+      return eq;
+    }
+    _saveEquipped() { this._save('serpent.equipped', JSON.stringify(this.equipped)); }
+
+    // sum/product of an effect across all equipped gear (skin has no effects)
+    _equippedGear() { return ['charm', 'armor', 'relic'].map((s) => GEAR_BY_ID[this.equipped[s]]).filter(Boolean); }
+    _effectSum(key) { return this._equippedGear().reduce((a, g) => a + (g.effects[key] || 0), 0); }
+    _effectMul(key) { return this._equippedGear().reduce((a, g) => a * (g.effects[key] || 1), 1); }
 
     // ------------------------------------------------------------------ setup
     reset() {
@@ -406,12 +499,23 @@
       this.xp = 0;
       this.eaten = 0;
       this.coinsThisRun = 0;
-      this.tickMs = CONFIG.baseTickMs;
+      this.speedMult = this._effectMul('speedMult');
+      this.tickMs = CONFIG.baseTickMs * this.speedMult;
 
-      // revive resources for this run
-      this.freeRevives = this.owned.has('guardian') ? 1 : 0;
+      // revive resources for this run (from equipped armor/relics)
+      this.freeRevives = this._effectSum('freeRevives');
       this.revivesUsed = 0;
       this.invulnUntil = 0;
+
+      // campaign — a fresh run starts at chapter 1
+      this.chapterIndex = 0;
+      this.phase = 'journey';
+      this.chapterFruit = 0;
+      this.orbs = [];
+      this.hazards = [];
+      this.boss = null;
+      this.story = null;
+      this.nextHazardAt = 0;
 
       this.foods = [];
       this._refillFood();
@@ -446,12 +550,12 @@
     start() {
       if (this.state === 'playing') return;
       this.shopOpen = false;
-      if (this.state === 'menu' || this.state === 'dead') this.reset();
-      this.state = 'playing';
-      this.acc = 0;
-      this.lastFrame = nowMs();
-      this.audio.start();
-      this._renderOverlay();
+      this.equipOpen = false;
+      if (this.state === 'menu' || this.state === 'dead' || this.state === 'story') {
+        this.reset();
+        this.audio.start();
+        this._beginChapter(0);
+      }
     }
     togglePause() {
       if (this.state === 'playing') this.state = 'paused';
@@ -508,6 +612,147 @@
       this._syncHud();
     }
 
+    // -------------------------------------------------------- boss mechanics
+    _activeHazardAt(x, y) {
+      return this.hazards.some((h) => h.x === x && h.y === y && this.time >= h.activeAt && this.time < h.expireAt);
+    }
+    _occupiedSet() {
+      const s = new Set(this.snake.map((c) => c.x + ',' + c.y));
+      for (const f of this.foods) s.add(f.x + ',' + f.y);
+      for (const o of this.orbs) s.add(o.x + ',' + o.y);
+      for (const h of this.hazards) s.add(h.x + ',' + h.y);
+      return s;
+    }
+    _randFreeCell(avoidHead) {
+      const occ = this._occupiedSet();
+      const head = this.snake[0];
+      const free = [];
+      for (let y = 0; y < CONFIG.rows; y++)
+        for (let x = 0; x < CONFIG.cols; x++) {
+          if (occ.has(x + ',' + y)) continue;
+          if (avoidHead && head && Math.abs(x - head.x) + Math.abs(y - head.y) <= 2) continue;
+          free.push({ x, y });
+        }
+      return free.length ? free[randInt(free.length)] : null;
+    }
+    _updateBoss() {
+      // top up energy orbs
+      let guard = 0;
+      while (this.orbs.length < BOSS_CFG.orbTarget && guard++ < 40) {
+        const cell = this._randFreeCell();
+        if (!cell) break;
+        this.orbs.push({ x: cell.x, y: cell.y, born: this.time });
+      }
+      // retire expired hazards
+      this.hazards = this.hazards.filter((h) => this.time < h.expireAt);
+      // spawn hazards on a cadence that quickens as the boss weakens
+      if (this.time >= this.nextHazardAt) {
+        const cell = this._randFreeCell(true);
+        if (cell) {
+          this.hazards.push({
+            x: cell.x, y: cell.y,
+            activeAt: this.time + BOSS_CFG.hazardWarnMs,
+            expireAt: this.time + BOSS_CFG.hazardWarnMs + BOSS_CFG.hazardActiveMs,
+          });
+        }
+        const frac = this.boss ? this.boss.hp / this.boss.maxHp : 1;
+        this.nextHazardAt = this.time + BOSS_CFG.hazardBaseMs * (0.5 + 0.5 * frac);
+      }
+    }
+
+    // --------------------------------------------------------- campaign flow
+    _showStory(title, body, onContinue, flavor, cta) {
+      this.state = 'story';
+      this.story = { title, body, onContinue, flavor: flavor || '', cta: cta || 'Continue' };
+      this._renderOverlay();
+    }
+    _continueStory() {
+      const fn = this.story && this.story.onContinue;
+      this.story = null;
+      if (fn) fn();
+    }
+    _beginChapter(i) {
+      this.chapterIndex = i;
+      const ch = CHAPTERS[i];
+      this.phase = 'journey';
+      this.chapterFruit = 0;
+      this.orbs = [];
+      this.hazards = [];
+      this.boss = null;
+      this.foods = [];
+      this._refillFood();
+      this._showStory(`Chapter ${i + 1}`, ch.intro, () => this._resumePlay(), ch.title, 'Begin');
+    }
+    _resumePlay() {
+      this.state = 'playing';
+      this.acc = 0;
+      this.lastFrame = nowMs();
+      this._renderOverlay();
+    }
+    _triggerBoss() {
+      const ch = CHAPTERS[this.chapterIndex];
+      this._showStory(
+        ch.boss.name,
+        `${ch.boss.name}, ${ch.boss.title}, rises to bar your path.\nEat the crimson orbs to wound it — and stay clear of the void it spits.`,
+        () => this._enterBoss(), 'Boss Fight', 'Fight'
+      );
+    }
+    _enterBoss() {
+      const ch = CHAPTERS[this.chapterIndex];
+      this.phase = 'boss';
+      this.boss = { hp: ch.boss.hp, maxHp: ch.boss.hp, name: ch.boss.name, title: ch.boss.title, color: ch.boss.color, flash: -9999 };
+      this.foods = [];
+      this.orbs = [];
+      this.hazards = [];
+      this.nextHazardAt = this.time + 1600;
+      this._resumePlay();
+    }
+    _bossDefeated() {
+      const ch = CHAPTERS[this.chapterIndex];
+      this.orbs = [];
+      this.hazards = [];
+      this.phase = 'journey';
+      const reward = BOSS_CFG.clearCoins + this.chapterIndex * 30;
+      this.coins += reward; this.coinsThisRun += reward; this._save('serpent.coins', this.coins);
+      if (this.chapterIndex + 1 > this.chaptersCleared) {
+        this.chaptersCleared = this.chapterIndex + 1;
+        this._save('serpent.chapters', this.chaptersCleared);
+      }
+      const head = this.snake[0];
+      this.particles.burst((head.x + 0.5) * this.cell, (head.y + 0.5) * this.cell, PALETTE.coin, 26, 250);
+      this.particles.burst((head.x + 0.5) * this.cell, (head.y + 0.5) * this.cell, ch.boss.color, 16, 180);
+      this.audio.levelUp();
+      if (navigator.vibrate) navigator.vibrate([15, 40, 15, 40, 30]);
+      this.shake = 0.7;
+      this._syncHud();
+      const next = this.chapterIndex + 1;
+      this._showStory('Victory', `${ch.outro}\n\n+${reward} coins earned.`,
+        () => {
+          if (next < CHAPTERS.length) this._beginChapter(next);
+          else this._showStory('The End', FINAL_TEXT, () => this._toMenu(), 'Campaign Cleared', 'Return');
+        },
+        'Victory', next < CHAPTERS.length ? 'Onward' : 'Continue'
+      );
+    }
+    _toMenu() {
+      this.reset();
+      this.state = 'menu';
+      this.shopOpen = false;
+      this.equipOpen = false;
+      this._renderOverlay();
+      this._syncHud();
+    }
+    _roundRect(ctx, x, y, w, h, r) {
+      r = Math.min(r, w / 2, h / 2);
+      ctx.beginPath();
+      ctx.moveTo(x + r, y);
+      ctx.arcTo(x + w, y, x + w, y + h, r);
+      ctx.arcTo(x + w, y + h, x, y + h, r);
+      ctx.arcTo(x, y + h, x, y, r);
+      ctx.arcTo(x, y, x + w, y, r);
+      ctx.closePath();
+    }
+
     // ------------------------------------------------------------------ input
     _queueDir(nx, ny) {
       const last = this.pending.length ? this.pending[this.pending.length - 1] : this.dir;
@@ -521,12 +766,17 @@
       const head = this.snake[0];
       const nx = head.x + this.dir.x;
       const ny = head.y + this.dir.y;
-
-      if (nx < 0 || ny < 0 || nx >= CONFIG.cols || ny >= CONFIG.rows) { this._die(); return; }
-
-      const foodIndex = this.foods.findIndex((f) => f.x === nx && f.y === ny);
-      const willEat = foodIndex >= 0;
       const invuln = this.time < this.invulnUntil;
+
+      // walls
+      if (nx < 0 || ny < 0 || nx >= CONFIG.cols || ny >= CONFIG.rows) { this._die(); return; }
+      // lethal boss hazard
+      if (!invuln && this._activeHazardAt(nx, ny)) { this._die(); return; }
+
+      const foodIndex = this.phase === 'journey' ? this.foods.findIndex((f) => f.x === nx && f.y === ny) : -1;
+      const orbIndex = this.phase === 'boss' ? this.orbs.findIndex((o) => o.x === nx && o.y === ny) : -1;
+      const willEat = foodIndex >= 0 || orbIndex >= 0;
+
       const body = (willEat || this.grow > 0) ? this.snake : this.snake.slice(0, this.snake.length - 1);
       if (!invuln && body.some((c) => c.x === nx && c.y === ny)) { this._die(); return; }
 
@@ -534,15 +784,35 @@
       this.snake.unshift({ x: nx, y: ny });
       if (this.grow > 0) this.grow--; else this.snake.pop();
 
-      if (willEat) {
+      const px = (nx + 0.5) * this.cell, py = (ny + 0.5) * this.cell;
+
+      if (foodIndex >= 0) {
         const eaten = this.foods.splice(foodIndex, 1)[0];
         this.grow += 1;
         this.eaten += 1;
-        this.particles.burst((nx + 0.5) * this.cell, (ny + 0.5) * this.cell, eaten.fruit.color, 12, 160);
+        this.chapterFruit += 1;
+        this.coins += this._effectSum('coinPerFruit');
+        this.coinsThisRun += this._effectSum('coinPerFruit');
+        this.particles.burst(px, py, eaten.fruit.color, 12, 160);
         this.audio.eat();
         if (navigator.vibrate) navigator.vibrate(14);
-        this._gainXp(eaten.fruit.xp + (this.owned.has('scholar') ? 1 : 0));
-        this._refillFood();
+        this._gainXp(eaten.fruit.xp + this._effectSum('xpPerFruit'));
+        this._save('serpent.coins', this.coins);
+        if (this.chapterFruit >= CHAPTERS[this.chapterIndex].fruitGoal) this._triggerBoss();
+        else this._refillFood();
+        this._syncHud();
+      } else if (orbIndex >= 0 && this.boss) {
+        this.orbs.splice(orbIndex, 1);
+        this.grow += 1;
+        const gain = BOSS_CFG.orbCoins + this._effectSum('coinPerFruit');
+        this.coins += gain; this.coinsThisRun += gain; this._save('serpent.coins', this.coins);
+        this.boss.hp -= 1;
+        this.boss.flash = this.time;
+        this.particles.burst(px, py, '#ff6b6b', 14, 190);
+        this.audio.hit();
+        if (navigator.vibrate) navigator.vibrate(18);
+        this._syncHud();
+        if (this.boss.hp <= 0) this._bossDefeated();
       }
     }
 
@@ -552,8 +822,7 @@
       while (this.xp >= need) {
         this.xp -= need;
         this.level += 1;
-        let reward = 5 + this.level * 2;
-        if (this.owned.has('lucky')) reward = Math.floor(reward * 1.5);
+        let reward = Math.floor((5 + this.level * 2) * this._effectMul('coinMult'));
         this.coins += reward;
         this.coinsThisRun += reward;
         this._onLevelUp();
@@ -565,7 +834,7 @@
     }
 
     _onLevelUp() {
-      this.tickMs = Math.max(CONFIG.minTickMs, CONFIG.baseTickMs - (this.level - 1) * CONFIG.speedPerLevel);
+      this.tickMs = Math.max(CONFIG.minTickMs, CONFIG.baseTickMs - (this.level - 1) * CONFIG.speedPerLevel) * this.speedMult;
       const head = this.snake[0];
       this.particles.burst((head.x + 0.5) * this.cell, (head.y + 0.5) * this.cell, PALETTE.coin, 18, 200);
       this.audio.levelUp();
@@ -595,6 +864,8 @@
         this.interp = this.tickMs ? clamp(this.acc / this.tickMs, 0, 1) : 1;
       }
 
+      if (this.state === 'playing' && this.phase === 'boss') this._updateBoss();
+
       this.particles.update(dt);
       if (this.shake > 0) this.shake = Math.max(0, this.shake - dt / 380);
 
@@ -618,9 +889,17 @@
 
       this._drawBoard(ctx, w, h);
       this._drawGrid(ctx);
-      this._drawFoods(ctx);
+      if (this.phase === 'boss' && this.boss) this._drawBossBackdrop(ctx, w, h);
+      this._drawHazards(ctx);
+      if (this.phase === 'boss') this._drawOrbs(ctx);
+      else this._drawFoods(ctx);
       this._drawSnake(ctx);
       this.particles.draw(ctx);
+
+      if (this.state === 'playing') {
+        if (this.phase === 'boss' && this.boss) this._drawBossBar(ctx, w);
+        else this._drawChapterBanner(ctx, w);
+      }
     }
 
     _drawBoard(ctx, w, h) {
@@ -629,6 +908,119 @@
       g.addColorStop(1, PALETTE.boardBottom);
       ctx.fillStyle = g;
       ctx.fillRect(-20, -20, w + 40, h + 40);
+      const ch = CHAPTERS[this.chapterIndex];
+      if (ch && ch.tint) { ctx.fillStyle = ch.tint; ctx.fillRect(-20, -20, w + 40, h + 40); }
+    }
+
+    _drawOrbs(ctx) {
+      const c = this.cell;
+      for (const o of this.orbs) {
+        const cx = (o.x + 0.5) * c;
+        const pulse = 0.5 + 0.5 * Math.sin((this.time - o.born) * 0.01);
+        const cy = (o.y + 0.5) * c;
+        const r = c * 0.3 * (1 + 0.15 * pulse);
+        const halo = ctx.createRadialGradient(cx, cy, 0, cx, cy, r * 2.4);
+        halo.addColorStop(0, 'rgba(255, 70, 85, 0.6)'); halo.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = halo; ctx.beginPath(); ctx.arc(cx, cy, r * 2.4, 0, Math.PI * 2); ctx.fill();
+        const body = ctx.createRadialGradient(cx - r * 0.3, cy - r * 0.3, r * 0.1, cx, cy, r);
+        body.addColorStop(0, '#ffd6d6'); body.addColorStop(0.5, '#ff5566'); body.addColorStop(1, '#bf2536');
+        ctx.fillStyle = body; ctx.beginPath(); ctx.arc(cx, cy, r, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = 'rgba(255,255,255,0.85)';
+        ctx.beginPath(); ctx.arc(cx - r * 0.3, cy - r * 0.35, r * 0.2, 0, Math.PI * 2); ctx.fill();
+      }
+    }
+
+    _drawHazards(ctx) {
+      const c = this.cell;
+      for (const h of this.hazards) {
+        const x = h.x * c, y = h.y * c;
+        if (this.time < h.activeAt) {
+          const p = 0.5 + 0.5 * Math.sin(this.time * 0.02);
+          ctx.save();
+          ctx.strokeStyle = `rgba(170, 70, 230, ${0.4 + 0.4 * p})`;
+          ctx.lineWidth = 2;
+          this._roundRect(ctx, x + 3, y + 3, c - 6, c - 6, c * 0.2); ctx.stroke();
+          ctx.fillStyle = `rgba(150, 60, 210, ${0.06 + 0.08 * p})`;
+          this._roundRect(ctx, x + 3, y + 3, c - 6, c - 6, c * 0.2); ctx.fill();
+          ctx.restore();
+        } else {
+          const fade = clamp((h.expireAt - this.time) / 400, 0, 1);
+          ctx.save();
+          ctx.globalAlpha = 0.55 + 0.35 * fade;
+          const g = ctx.createRadialGradient(x + c / 2, y + c / 2, 0, x + c / 2, y + c / 2, c * 0.6);
+          g.addColorStop(0, '#43105a'); g.addColorStop(0.7, '#7a1fb0'); g.addColorStop(1, 'rgba(120,30,180,0.25)');
+          ctx.fillStyle = g;
+          this._roundRect(ctx, x + 2, y + 2, c - 4, c - 4, c * 0.22); ctx.fill();
+          ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.lineWidth = 2; ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(x + c * 0.32, y + c * 0.32); ctx.lineTo(x + c * 0.68, y + c * 0.68);
+          ctx.moveTo(x + c * 0.68, y + c * 0.32); ctx.lineTo(x + c * 0.32, y + c * 0.68);
+          ctx.stroke();
+          ctx.restore();
+        }
+      }
+    }
+
+    _drawBossBackdrop(ctx, w, h) {
+      const b = this.boss;
+      const cx = w / 2, cy = h * 0.3, R = w * 0.26;
+      const hit = this.time - b.flash < 160;
+      ctx.save();
+      ctx.globalAlpha = 0.15;
+      ctx.fillStyle = hit ? '#ff5a5a' : b.color;
+      ctx.beginPath(); ctx.arc(cx, cy, R, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = 0.5;
+      ctx.fillStyle = hit ? 'rgba(255,150,150,0.5)' : 'rgba(255,255,255,0.16)';
+      ctx.beginPath(); ctx.ellipse(cx, cy, R * 0.52, R * 0.3, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.fillStyle = hit ? '#ff3030' : '#0c1020';
+      ctx.beginPath(); ctx.ellipse(cx, cy, R * 0.13, R * 0.26, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.restore();
+    }
+
+    _drawBossBar(ctx, w) {
+      const b = this.boss, pad = 12, barH = 9, y = 10;
+      const bw = w - pad * 2;
+      ctx.save();
+      ctx.font = '700 13px Outfit, system-ui, sans-serif';
+      ctx.textBaseline = 'middle';
+      ctx.textAlign = 'left';
+      ctx.fillStyle = 'rgba(255,255,255,0.92)';
+      ctx.fillText(b.name, pad, y + 7);
+      ctx.textAlign = 'right';
+      ctx.fillStyle = 'rgba(255,255,255,0.5)';
+      ctx.fillText(`${Math.max(0, b.hp)} / ${b.maxHp}`, w - pad, y + 7);
+      const ty = y + 19;
+      ctx.fillStyle = 'rgba(255,255,255,0.1)';
+      this._roundRect(ctx, pad, ty, bw, barH, barH / 2); ctx.fill();
+      const frac = clamp(b.hp / b.maxHp, 0, 1);
+      if (frac > 0) {
+        const g = ctx.createLinearGradient(pad, 0, pad + bw, 0);
+        g.addColorStop(0, '#ff7a7a'); g.addColorStop(1, '#ff2d55');
+        ctx.fillStyle = g;
+        this._roundRect(ctx, pad, ty, Math.max(barH, bw * frac), barH, barH / 2); ctx.fill();
+      }
+      ctx.restore();
+    }
+
+    _drawChapterBanner(ctx, w) {
+      const ch = CHAPTERS[this.chapterIndex]; if (!ch) return;
+      const label = `Ch.${this.chapterIndex + 1} · ${ch.title}`;
+      const prog = `${Math.min(this.chapterFruit, ch.fruitGoal)}/${ch.fruitGoal}`;
+      ctx.save();
+      ctx.font = '600 12px Outfit, system-ui, sans-serif';
+      ctx.textBaseline = 'middle';
+      const tw = ctx.measureText(label).width;
+      const pw = ctx.measureText(prog).width;
+      const pillW = tw + pw + 42, pillH = 24, cx = w / 2, y = 16;
+      ctx.fillStyle = 'rgba(8,12,22,0.6)';
+      this._roundRect(ctx, cx - pillW / 2, y - pillH / 2, pillW, pillH, pillH / 2); ctx.fill();
+      ctx.fillStyle = 'rgba(255,255,255,0.85)';
+      ctx.textAlign = 'left';
+      ctx.fillText(label, cx - pillW / 2 + 13, y);
+      ctx.fillStyle = PALETTE.coin;
+      ctx.textAlign = 'right';
+      ctx.fillText(prog, cx + pillW / 2 - 13, y);
+      ctx.restore();
     }
 
     _drawGrid(ctx) {
@@ -747,38 +1139,114 @@
       o.classList.remove('hidden');
 
       if (this.shopOpen) { this._renderShop(o); return; }
+      if (this.equipOpen) { this._renderEquip(o); return; }
+      if (this.state === 'story') { this._renderStory(o); return; }
 
       if (this.state === 'menu') {
+        const cleared = this.chaptersCleared > 0
+          ? `<p class="subtitle">Chapters cleared: <b>${Math.min(this.chaptersCleared, CHAPTERS.length)}/${CHAPTERS.length}</b></p>` : '';
         o.innerHTML = `
           <h2 class="title">Serpent</h2>
-          <p class="subtitle">Eat fruit to fill the XP bar. Level up to earn coins, then spend them in the shop.</p>
+          <p class="subtitle">A serpent's quest across ${CHAPTERS.length} chapters. Eat, grow, gear up — and slay what waits at the end of each.</p>
           <div class="wallet"><span class="coin-ic"></span>${this.coins}</div>
           <div class="btn-row">
             <button class="btn" data-action="start">Play</button>
+            <button class="btn ghost" data-action="equip">Equip</button>
             <button class="btn ghost" data-action="shop">Shop</button>
           </div>
+          ${cleared}
           <div class="keys"><span class="key">↑ ↓ ← →</span><span class="key">WASD</span><span class="key">Swipe</span></div>`;
       } else if (this.state === 'paused') {
         o.innerHTML = `
           <h2 class="title">Paused</h2>
-          <button class="btn" data-action="resume">Resume</button>
+          <div class="btn-row">
+            <button class="btn" data-action="resume">Resume</button>
+            <button class="btn ghost" data-action="equip">Equip</button>
+          </div>
           <div class="keys"><span class="key">Space</span><span class="key">to resume</span></div>`;
       } else if (this.state === 'dead') {
         o.innerHTML = `
-          <h2 class="title">Game Over</h2>
+          <h2 class="title">You Fell</h2>
           <div class="final">
+            <div class="fcol"><div class="fs-label">Chapter</div><div class="fs-num">${this.chapterIndex + 1}</div></div>
             <div class="fcol"><div class="fs-label">Level</div><div class="fs-num">${this.level}</div></div>
-            <div class="fcol"><div class="fs-label">Fruit</div><div class="fs-num">${this.eaten}</div></div>
             <div class="fcol coins-col"><div class="fs-label">Coins +</div><div class="fs-num">${this.coinsThisRun}</div></div>
           </div>
-          ${this._newBest ? '<div class="badge-new">New Best Level!</div>' : ''}
           ${this.revivesUsed > 0 ? `<div class="revived">Revived ×${this.revivesUsed} 🧿</div>` : ''}
           <div class="wallet"><span class="coin-ic"></span>${this.coins} total</div>
           <div class="btn-row">
-            <button class="btn" data-action="start">Play Again</button>
+            <button class="btn" data-action="start">Retry</button>
+            <button class="btn ghost" data-action="equip">Equip</button>
             <button class="btn ghost" data-action="shop">Shop</button>
           </div>`;
       }
+    }
+
+    _renderStory(o) {
+      const s = this.story; if (!s) return;
+      const body = s.body.split('\n').map((p) => (p.trim() ? `<p>${p.trim()}</p>` : '')).join('');
+      o.innerHTML = `
+        <div class="story">
+          ${s.flavor ? `<div class="story-eyebrow">${s.flavor}</div>` : ''}
+          <h2 class="story-title">${s.title}</h2>
+          <div class="story-body">${body}</div>
+          <button class="btn" data-action="story">${s.cta}</button>
+        </div>`;
+    }
+
+    _renderEquip(o) {
+      const slotBlock = (slot) => {
+        const equippedId = this.equipped[slot.id];
+        const eqItem = EQUIP_BY_ID[equippedId];
+        const opts = (slot.id === 'skin' ? SKINS : GEAR.filter((g) => g.slot === slot.id))
+          .filter((it) => this.owned.has(it.id));
+        const chips = [];
+        if (slot.id !== 'skin') {
+          chips.push(`<button class="chip${!equippedId ? ' on' : ''}" data-action="eq:${slot.id}:none">None</button>`);
+        }
+        for (const it of opts) {
+          const on = equippedId === it.id;
+          const swatch = slot.id === 'skin'
+            ? `<span class="chip-dot" style="background:${it.head}"></span>`
+            : `<span class="chip-emoji">${it.icon}</span>`;
+          chips.push(`<button class="chip${on ? ' on' : ''}" data-action="eq:${slot.id}:${it.id}">${swatch}${it.name}</button>`);
+        }
+        if (opts.length === 0 && slot.id !== 'skin') chips.push('<span class="chip muted">None owned — visit the Shop</span>');
+        return `
+          <div class="eq-slot">
+            <div class="eq-slot-head">
+              <span class="eq-slot-name">${slot.icon} ${slot.name}</span>
+              <span class="eq-equipped">${eqItem ? eqItem.name : '—'}</span>
+            </div>
+            <div class="eq-chips">${chips.join('')}</div>
+            ${eqItem && eqItem.desc ? `<div class="eq-desc">${eqItem.desc}</div>` : ''}
+          </div>`;
+      };
+      o.innerHTML = `
+        <div class="shop">
+          <div class="shop-head">
+            <button class="back" data-action="closeEquip" aria-label="Back">‹</button>
+            <h2 class="shop-title">Equipment</h2>
+            <div class="wallet"><span class="coin-ic"></span>${this.coins}</div>
+          </div>
+          <div class="shop-list">${SLOTS.map(slotBlock).join('')}</div>
+        </div>`;
+    }
+
+    _equipSlot(slot, id) {
+      if (id === 'none') { this.equipped[slot] = null; }
+      else {
+        if (!this.owned.has(id)) return;
+        const it = EQUIP_BY_ID[id];
+        if (!it || it.slot !== slot) return;
+        this.equipped[slot] = id;
+        if (slot === 'skin') this.skin = SKIN_BY_ID[id];
+      }
+      this._saveEquipped();
+      this.audio.buy();
+      if (navigator.vibrate) navigator.vibrate(8);
+      this._syncHud();
+      this._renderOverlay();
     }
 
     // ------------------------------------------------------------------ shop
@@ -813,8 +1281,8 @@
       } else if (kind === 'gear') {
         right = this.owned.has(it.id) ? `<span class="si-tag owned">Owned</span>` : priceBtn('buy:' + it.id);
       } else { // skin
-        if (this.equippedSkin === it.id) right = `<span class="si-tag equipped">Equipped</span>`;
-        else if (this.owned.has(it.id)) right = `<button class="si-btn equip" data-action="equip:${it.id}">Equip</button>`;
+        if (this.equipped.skin === it.id) right = `<span class="si-tag equipped">Equipped</span>`;
+        else if (this.owned.has(it.id)) right = `<button class="si-btn equip" data-action="eq:skin:${it.id}">Equip</button>`;
         else right = priceBtn('buy:' + it.id);
       }
       const icon = kind === 'skin'
@@ -843,20 +1311,13 @@
       } else {
         this.owned.add(id);
         this._saveOwned();
-        if (SKIN_BY_ID[id]) this._equip(id, true);
+        // auto-equip: skins always; gear only when its slot is empty
+        if (it.slot === 'skin') { this.equipped.skin = id; this.skin = SKIN_BY_ID[id]; this._saveEquipped(); }
+        else if (!this.equipped[it.slot]) { this.equipped[it.slot] = id; this._saveEquipped(); }
       }
       this.audio.buy();
       if (navigator.vibrate) navigator.vibrate(12);
       this._syncHud();
-      this._renderOverlay();
-    }
-
-    _equip(id, silent) {
-      if (!this.owned.has(id) || !SKIN_BY_ID[id]) return;
-      this.equippedSkin = id;
-      this.skin = SKIN_BY_ID[id];
-      this._save('serpent.skin', id);
-      if (!silent) { this.audio.buy(); if (navigator.vibrate) navigator.vibrate(8); }
       this._renderOverlay();
     }
 
@@ -872,6 +1333,7 @@
         else if (k === ' ' || k === 'enter') this._onPrimaryAction();
         else if (k === 'p' || k === 'escape') {
           if (this.shopOpen) { this.shopOpen = false; this._renderOverlay(); }
+          else if (this.equipOpen) { this.equipOpen = false; this._renderOverlay(); }
           else if (this.state === 'playing' || this.state === 'paused') this.togglePause();
         }
       }, { passive: false });
@@ -882,10 +1344,13 @@
         const a = btn.getAttribute('data-action');
         if (a === 'start') this.start();
         else if (a === 'resume') this.togglePause();
+        else if (a === 'story') this._continueStory();
         else if (a === 'shop') { this.shopOpen = true; this._renderOverlay(); }
         else if (a === 'closeShop') { this.shopOpen = false; this._renderOverlay(); }
+        else if (a === 'equip') { this.equipOpen = true; this._renderOverlay(); }
+        else if (a === 'closeEquip') { this.equipOpen = false; this._renderOverlay(); }
         else if (a.startsWith('buy:')) this._buy(a.slice(4));
-        else if (a.startsWith('equip:')) this._equip(a.slice(6));
+        else if (a.startsWith('eq:')) { const parts = a.split(':'); this._equipSlot(parts[1], parts[2]); }
       });
 
       this.pauseBtn.addEventListener('click', () => {
@@ -918,7 +1383,10 @@
         tracking = false;
         const t = e.changedTouches[0];
         const moved = Math.abs(t.clientX - sx) + Math.abs(t.clientY - sy);
-        if (moved < SWIPE && !this.shopOpen && (this.state === 'menu' || this.state === 'dead')) this.start();
+        if (moved >= SWIPE) return;
+        if (e.target.closest('[data-action]')) return; // let the click handler run it
+        if (this.state === 'story') this._continueStory();
+        else if (!this.shopOpen && !this.equipOpen && (this.state === 'menu' || this.state === 'dead')) this.start();
       }, { passive: true });
 
       window.addEventListener('resize', () => this.resize());
@@ -929,12 +1397,14 @@
     }
 
     _onDirIntent(x, y) {
-      if (this.shopOpen) return;
+      if (this.shopOpen || this.equipOpen || this.state === 'story') return;
       if (this.state === 'playing') this._queueDir(x, y);
-      else if (this.state === 'menu' || this.state === 'dead') { this.start(); this._queueDir(x, y); }
+      else if (this.state === 'menu' || this.state === 'dead') { this.start(); }
     }
     _onPrimaryAction() {
       if (this.shopOpen) { this.shopOpen = false; this._renderOverlay(); return; }
+      if (this.equipOpen) { this.equipOpen = false; this._renderOverlay(); return; }
+      if (this.state === 'story') { this._continueStory(); return; }
       if (this.state === 'menu' || this.state === 'dead') this.start();
       else this.togglePause();
     }

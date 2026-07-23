@@ -277,6 +277,42 @@ body {
 .si-tag.owned { color: var(--text-dim); background: rgba(255, 255, 255, 0.06); }
 .si-tag.equipped { color: var(--green); background: rgba(64, 217, 138, 0.12); }
 
+/* ---- Equipment screen ---- */
+.eq-slot {
+  padding: 12px 14px; margin-bottom: 10px;
+  border-radius: 14px; text-align: left;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--panel-border);
+}
+.eq-slot-head { display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 9px; }
+.eq-slot-name { font-weight: 700; }
+.eq-equipped { color: var(--green); font-weight: 600; font-size: 0.85rem; }
+.eq-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  display: inline-flex; align-items: center; gap: 6px;
+  font-family: var(--font); font-weight: 600; font-size: 0.82rem;
+  color: var(--text); cursor: pointer;
+  padding: 6px 11px; border-radius: 10px;
+  border: 1px solid var(--panel-border); background: rgba(255, 255, 255, 0.04);
+}
+.chip.on { background: linear-gradient(120deg, var(--green), var(--green-2)); color: #06120c; border-color: transparent; }
+.chip.muted { color: var(--text-dim); cursor: default; background: transparent; border-style: dashed; }
+.chip:active { transform: scale(0.95); }
+.chip-dot { width: 14px; height: 14px; border-radius: 50%; }
+.chip-emoji { font-size: 1rem; }
+.eq-desc { color: var(--text-dim); font-size: 0.78rem; margin-top: 8px; }
+
+/* ---- Story card ---- */
+.story { max-width: 36ch; display: flex; flex-direction: column; align-items: center; gap: 14px; }
+.story-eyebrow {
+  font-size: 0.66rem; letter-spacing: 0.2em; text-transform: uppercase;
+  color: var(--green); font-weight: 700;
+}
+.story-title { font-size: clamp(1.7rem, 7.5vw, 2.5rem); font-weight: 800; margin: 0; line-height: 1.1; }
+.story-body { color: var(--text-dim); font-size: 0.96rem; line-height: 1.55; }
+.story-body p { margin: 0 0 9px; }
+.story-body p:last-child { margin-bottom: 0; }
+
 /* ---- Hint footer ---- */
 .hint { color: var(--text-dim); font-size: 0.82rem; min-height: 1.2em; }
 .hint-mobile { display: none; }
