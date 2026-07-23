@@ -1,0 +1,13 @@
+# dependencies (none required, but ignore if added later)
+node_modules/
+
+# os / editor
+.DS_Store
+Thumbs.db
+*.swp
+.vscode/
+.idea/
+
+# local test artifacts
+shot-*.png
+*.log
